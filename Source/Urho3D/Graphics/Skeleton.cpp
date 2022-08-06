@@ -114,6 +114,7 @@ void Skeleton::Define(const Skeleton& src)
     rootBoneIndex_ = src.rootBoneIndex_;
 }
 
+#if 0
 void Skeleton::SetRootBoneIndex(unsigned index)
 {
     if (index < bones_.Size())
@@ -121,6 +122,7 @@ void Skeleton::SetRootBoneIndex(unsigned index)
     else
         URHO3D_LOGERROR("Root bone index out of bounds");
 }
+#endif
 
 void Skeleton::ClearBones()
 {

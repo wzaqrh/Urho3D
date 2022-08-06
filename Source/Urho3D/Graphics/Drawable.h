@@ -322,8 +322,7 @@ protected:
     /// Move into another octree octant.
     void SetOctant(Octant* octant) { octant_ = octant; }
 
-    /// World-space bounding box.
-    BoundingBox worldBoundingBox_;
+    BoundingBox worldBoundingBox_;//.nodeµÄworld aabb
     /// Local-space bounding box.
     BoundingBox boundingBox_;
     /// Draw call source data.

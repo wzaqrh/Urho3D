@@ -40,18 +40,12 @@ class URHO3D_API AnimatedModel : public StaticModel
     friend class AnimationState;
 
 public:
-    /// Construct.
     AnimatedModel(Context* context);
-    /// Destruct.
     virtual ~AnimatedModel();
-    /// Register object factory. Drawable must be registered first.
     static void RegisterObject(Context* context);
 
-    /// Load from binary data. Return true if successful.
     virtual bool Load(Deserializer& source, bool setInstanceDefault = false);
-    /// Load from XML data. Return true if successful.
     virtual bool LoadXML(const XMLElement& source, bool setInstanceDefault = false);
-    /// Load from JSON data. Return true if successful.
     virtual bool LoadJSON(const JSONValue& source, bool setInstanceDefault = false);
     /// Apply attribute changes that can not be applied immediately. Called after scene load or a network update.
     virtual void ApplyAttributes();
@@ -99,44 +93,27 @@ public:
     /// Apply all animation states to nodes.
     void ApplyAnimation();
 
-    /// Return skeleton.
+    //.Skeleton
     Skeleton& GetSkeleton() { return skeleton_; }
 
-    /// Return all animation states.
+    //.AnimationState
     const Vector<SharedPtr<AnimationState> >& GetAnimationStates() const { return animationStates_; }
-
-    /// Return number of animation states.
     unsigned GetNumAnimationStates() const { return animationStates_.Size(); }
-
-    /// Return animation state by animation pointer.
     AnimationState* GetAnimationState(Animation* animation) const;
-    /// Return animation state by animation name.
     AnimationState* GetAnimationState(const String& animationName) const;
-    /// Return animation state by animation name hash.
     AnimationState* GetAnimationState(const StringHash animationNameHash) const;
-    /// Return animation state by index.
     AnimationState* GetAnimationState(unsigned index) const;
 
-    /// Return animation LOD bias.
     float GetAnimationLodBias() const { return animationLodBias_; }
 
-    /// Return whether to update animation when not visible.
-    bool GetUpdateInvisible() const { return updateInvisible_; }
+    bool GetUpdateInvisible() const { return updateInvisible_; }//.不可见时是否需要Update
 
-    /// Return all vertex morphs.
+    //.Morph
     const Vector<ModelMorph>& GetMorphs() const { return morphs_; }
-
-    /// Return all morph vertex buffers.
     const Vector<SharedPtr<VertexBuffer> >& GetMorphVertexBuffers() const { return morphVertexBuffers_; }
-
-    /// Return number of vertex morphs.
     unsigned GetNumMorphs() const { return morphs_.Size(); }
-
-    /// Return vertex morph weight by index.
     float GetMorphWeight(unsigned index) const;
-    /// Return vertex morph weight by name.
     float GetMorphWeight(const String& name) const;
-    /// Return vertex morph weight by name hash.
     float GetMorphWeight(StringHash nameHash) const;
 
     /// Return whether is the master (first) animated model.
@@ -165,17 +142,15 @@ public:
     /// Return per-geometry skin matrices. If empty, uses global skinning
     const Vector<PODVector<Matrix3x4> >& GetGeometrySkinMatrices() const { return geometrySkinMatrices_; }
 
-    /// Recalculate the bone bounding box. Normally called internally, but can also be manually called if up-to-date information before rendering is necessary.
-    void UpdateBoneBoundingBox();
+    void UpdateBoneBoundingBox();//.可手动调用
 
 protected:
     /// Handle node being assigned.
     virtual void OnNodeSet(Node* node);
     /// Handle node transform being dirtied.
     virtual void OnMarkedDirty(Node* node);
-    /// Recalculate the world-space bounding box.
-    virtual void OnWorldBoundingBoxUpdate();
 
+    virtual void OnWorldBoundingBoxUpdate();//.被GetWorldBoundingBox回调（脏标记）
 private:
     /// Assign skeleton and animation bone node references as a postprocess. Called by ApplyAttributes.
     void AssignBoneNodes();
@@ -209,15 +184,14 @@ private:
     /// Handle model reload finished.
     void HandleModelReloadFinished(StringHash eventType, VariantMap& eventData);
 
-    /// Skeleton.
     Skeleton skeleton_;
-    /// Morph vertex buffers.
+    BoundingBox boneBoundingBox_;//.所有bone的（相对node的）aabb并集
+
     Vector<SharedPtr<VertexBuffer> > morphVertexBuffers_;
-    /// Vertex morphs.
     Vector<ModelMorph> morphs_;
-    /// Animation states.
+
     Vector<SharedPtr<AnimationState> > animationStates_;
-    /// Skinning matrices.
+
     PODVector<Matrix3x4> skinMatrices_;
     /// Mapping of subgeometry bone indices, used if more bones than skinning shader can manage.
     Vector<PODVector<unsigned> > geometryBoneMappings_;
@@ -225,8 +199,7 @@ private:
     Vector<PODVector<Matrix3x4> > geometrySkinMatrices_;
     /// Subgeometry skinning matrix pointers, if more bones than skinning shader can manage.
     Vector<PODVector<Matrix3x4*> > geometrySkinMatrixPtrs_;
-    /// Bounding box calculated from bones.
-    BoundingBox boneBoundingBox_;
+
     /// Attribute buffer.
     mutable VectorBuffer attrBuffer_;
     /// The frame number animation LOD distance was last calculated on.
@@ -251,8 +224,8 @@ private:
     bool skinningDirty_;
     /// Bone bounding box dirty flag.
     bool boneBoundingBoxDirty_;
-    /// Master model flag.
-    bool isMaster_;
+
+    bool isMaster_;//.是node的第一个AnimatedModel
     /// Loading flag. During loading bone nodes are not created, as they will be serialized as child nodes.
     bool loading_;
     /// Bone nodes assignment pending flag.

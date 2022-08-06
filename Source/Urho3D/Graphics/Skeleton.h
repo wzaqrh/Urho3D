@@ -36,10 +36,8 @@ class Deserializer;
 class ResourceCache;
 class Serializer;
 
-/// %Bone in a skeleton.
 struct Bone
 {
-    /// Construct with defaults.
     Bone() :
         parentIndex_(0),
         initialPosition_(Vector3::ZERO),
@@ -48,21 +46,19 @@ struct Bone
         animated_(true),
         collisionMask_(0),
         radius_(0.0f)
-    {
-    }
-
-    /// Bone name.
+    {}
+    
+    //.与关联node同名
     String name_;
-    /// Bone name hash.
     StringHash nameHash_;
-    /// Parent bone index.
+
     unsigned parentIndex_;
-    /// Reset position.
+
+    //.TPose
     Vector3 initialPosition_;
-    /// Reset rotation.
     Quaternion initialRotation_;
-    /// Reset scale.
     Vector3 initialScale_;
+
     /// Offset matrix.
     Matrix3x4 offsetMatrix_;
     /// Animation enable flag.
@@ -77,55 +73,31 @@ struct Bone
     WeakPtr<Node> node_;
 };
 
-/// Hierarchical collection of bones.
 class URHO3D_API Skeleton
 {
 public:
-    /// Construct an empty skeleton.
     Skeleton();
-    /// Destruct.
     ~Skeleton();
+	void ClearBones();
+	void Define(const Skeleton& src);
 
-    /// Read from a stream. Return true if successful.
-    bool Load(Deserializer& source);
-    /// Write to a stream. Return true if successful.
-    bool Save(Serializer& dest) const;
-    /// Define from another skeleton.
-    void Define(const Skeleton& src);
-    /// Set root bone's index.
-    void SetRootBoneIndex(unsigned index);
-    /// Clear bones.
-    void ClearBones();
-    /// Reset all animating bones to initial positions.
-    void Reset();
+	bool Load(Deserializer& source);
+	bool Save(Serializer& dest) const;
 
-    /// Return all bones.
+    void Reset();//.重置node为TPose
+	void ResetSilent();//.Reset但不标记脏
+public:
     const Vector<Bone>& GetBones() const { return bones_; }
-
-    /// Return modifiable bones.
     Vector<Bone>& GetModifiableBones() { return bones_; }
-
-    /// Return number of bones.
     unsigned GetNumBones() const { return bones_.Size(); }
 
-    /// Return root bone.
     Bone* GetRootBone();
-    /// Return bone by index.
     Bone* GetBone(unsigned index);
-    /// Return bone by name.
     Bone* GetBone(const String& boneName);
-    /// Return bone by name.
     Bone* GetBone(const char* boneName);
-    /// Return bone by name hash.
     Bone* GetBone(StringHash boneNameHash);
-
-    /// Reset all animating bones to initial positions without marking the nodes dirty. Requires the node dirtying to be performed later.
-    void ResetSilent();
-
 private:
-    /// Bones.
     Vector<Bone> bones_;
-    /// Root bone index.
     unsigned rootBoneIndex_;
 };
 
