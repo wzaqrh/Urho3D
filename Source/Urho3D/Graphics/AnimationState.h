@@ -36,142 +36,92 @@ class Skeleton;
 struct AnimationTrack;
 struct Bone;
 
-/// %Animation blending mode.
 enum AnimationBlendMode
 {
-    // Lerp blending (default)
-    ABM_LERP = 0,
-    // Additive blending based on difference from bind pose
-    ABM_ADDITIVE
+    ABM_LERP = 0,// Lerp blending (default)
+    ABM_ADDITIVE// Additive blending based on difference from bind pose
 };
 
-/// %Animation instance per-track data.
 struct AnimationStateTrack
 {
-    /// Construct with defaults.
     AnimationStateTrack();
-    /// Destruct
     ~AnimationStateTrack();
 
-    /// Animation track.
     const AnimationTrack* track_;
-    /// Bone pointer.
     Bone* bone_;
-    /// Scene node pointer.
     WeakPtr<Node> node_;
-    /// Blending weight.
+
     float weight_;
-    /// Last key frame.
     unsigned keyFrame_;
 };
 
-/// %Animation instance.
 class URHO3D_API AnimationState : public RefCounted
 {
 public:
-    /// Construct with animated model and animation pointers.
     AnimationState(AnimatedModel* model, Animation* animation);
-    /// Construct with root scene node and animation pointers.
     AnimationState(Node* node, Animation* animation);
-    /// Destruct.
     ~AnimationState();
 
-    /// Set start bone. Not supported in node animation mode. Resets any assigned per-bone weights.
-    void SetStartBone(Bone* bone);
-    /// Set looping enabled/disabled.
-    void SetLooped(bool looped);
-    /// Set blending weight.
-    void SetWeight(float weight);
-    /// Set blending mode.
-    void SetBlendMode(AnimationBlendMode mode);
-    /// Set time position. Does not fire animation triggers.
-    void SetTime(float time);
-    /// Set per-bone blending weight by track index. Default is 1.0 (full), is multiplied  with the state's blending weight when applying the animation. Optionally recurses to child bones.
+    void SetStartBone(Bone* bone);/// Set start bone. Not supported in node animation mode. Resets any assigned per-bone weights.
     void SetBoneWeight(unsigned index, float weight, bool recursive = false);
-    /// Set per-bone blending weight by name.
     void SetBoneWeight(const String& name, float weight, bool recursive = false);
-    /// Set per-bone blending weight by name hash.
     void SetBoneWeight(StringHash nameHash, float weight, bool recursive = false);
-    /// Modify blending weight.
-    void AddWeight(float delta);
-    /// Modify time position. %Animation triggers will be fired.
-    void AddTime(float delta);
-    /// Set blending layer.
+
+	void SetLooped(bool looped);
+	void SetWeight(float weight);
+	void SetBlendMode(AnimationBlendMode mode);
     void SetLayer(unsigned char layer);
 
-    /// Return animation.
-    Animation* GetAnimation() const { return animation_; }
+public://.setter
+	void SetTime(float time);
+    void AddTime(float delta);//.可能事件E_ANIMATIONFINISHED
 
-    /// Return animated model this state belongs to (model mode.)
-    AnimatedModel* GetModel() const;
-    /// Return root scene node this state controls (node hierarchy mode.)
-    Node* GetNode() const;
-    /// Return start bone.
-    Bone* GetStartBone() const;
-    /// Return per-bone blending weight by track index.
-    float GetBoneWeight(unsigned index) const;
-    /// Return per-bone blending weight by name.
-    float GetBoneWeight(const String& name) const;
-    /// Return per-bone blending weight by name.
-    float GetBoneWeight(StringHash nameHash) const;
-    /// Return track index with matching bone node, or M_MAX_UNSIGNED if not found.
-    unsigned GetTrackIndex(Node* node) const;
-    /// Return track index by bone name, or M_MAX_UNSIGNED if not found.
-    unsigned GetTrackIndex(const String& name) const;
-    /// Return track index by bone name hash, or M_MAX_UNSIGNED if not found.
-    unsigned GetTrackIndex(StringHash nameHash) const;
+	void AddWeight(float delta);
 
-    /// Return whether weight is nonzero.
-    bool IsEnabled() const { return weight_ > 0.0f; }
+    void Apply();//.按time_调整node.localSRT
 
-    /// Return whether looped.
-    bool IsLooped() const { return looped_; }
+public://.getter
+	float GetWeight() const { return weight_; }/// Return blending weight.
+	float GetTime() const { return time_; }/// Return time position.
 
-    /// Return blending weight.
-    float GetWeight() const { return weight_; }
+	bool IsEnabled() const { return weight_ > 0.0f; }/// Return whether weight is nonzero.
+	bool IsLooped() const { return looped_; }/// Return whether looped.
 
-    /// Return blending mode.
-    AnimationBlendMode GetBlendMode() const { return blendingMode_; }
+    AnimationBlendMode GetBlendMode() const { return blendingMode_; }/// Return blending mode.
+	float GetLength() const;/// Return animation length.
+	unsigned char GetLayer() const { return layer_; }/// Return blending layer.
 
-    /// Return time position.
-    float GetTime() const { return time_; }
+public://.getter
+	Animation* GetAnimation() const { return animation_; }
+	AnimatedModel* GetModel() const;
+	Node* GetNode() const;
+	Bone* GetStartBone() const;
 
-    /// Return animation length.
-    float GetLength() const;
+	float GetBoneWeight(unsigned index) const;
+	float GetBoneWeight(const String& name) const;
+	float GetBoneWeight(StringHash nameHash) const;
 
-    /// Return blending layer.
-    unsigned char GetLayer() const { return layer_; }
-
-    /// Apply the animation at the current time position.
-    void Apply();
+	unsigned GetTrackIndex(Node* node) const;
+	unsigned GetTrackIndex(const String& name) const;
+	unsigned GetTrackIndex(StringHash nameHash) const;
 
 private:
-    /// Apply animation to a skeleton. Transform changes are applied silently, so the model needs to dirty its root model afterward.
-    void ApplyToModel();
-    /// Apply animation to a scene node hierarchy.
-    void ApplyToNodes();
-    /// Apply track.
-    void ApplyTrack(AnimationStateTrack& stateTrack, float weight, bool silent);
+    void ApplyToModel();//所有track, 调用ApplyTrack, 权重为weight * track.weight, 静默
+    void ApplyToNodes();//所有track, 调用ApplyTrack, 权重为100%
+    void ApplyTrack(AnimationStateTrack& stateTrack, float weight, bool silent);//.按time_对track关键帧插值得到SRT, 按blendingMode_混合模式（权重weight）与node.localSRT混合
 
-    /// Animated model (model mode.)
-    WeakPtr<AnimatedModel> model_;
-    /// Root scene node (node hierarchy mode.)
-    WeakPtr<Node> node_;
-    /// Animation.
+private:
+    WeakPtr<AnimatedModel> model_;/// Animated model (model mode.)
+    WeakPtr<Node> node_;/// Root scene node (node hierarchy mode.)
     SharedPtr<Animation> animation_;
-    /// Start bone.
-    Bone* startBone_;
-    /// Per-track data.
-    Vector<AnimationStateTrack> stateTracks_;
-    /// Looped flag.
+
+    Bone* startBone_;//遍历animation_ tracks以name在startBone_里检索node、bone
+    Vector<AnimationStateTrack> stateTracks_;//遍历animation_ tracks以name在node_里检索node
+    
+	float weight_;
+	float time_;
     bool looped_;
-    /// Blending weight.
-    float weight_;
-    /// Time position.
-    float time_;
-    /// Blending layer.
     unsigned char layer_;
-    /// Blending mode.
     AnimationBlendMode blendingMode_;
 };
 

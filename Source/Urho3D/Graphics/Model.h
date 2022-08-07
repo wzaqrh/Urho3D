@@ -50,17 +50,13 @@ struct VertexBufferMorph
     SharedArrayPtr<unsigned char> morphData_;
 };
 
-/// Definition of a model's vertex morph.
+//.数据源
 struct ModelMorph
 {
-    /// Morph name.
     String name_;
-    /// Morph name hash.
     StringHash nameHash_;
-    /// Current morph weight.
     float weight_;
-    /// Morph data per vertex buffer.
-    HashMap<unsigned, VertexBufferMorph> buffers_;
+    HashMap<unsigned, VertexBufferMorph> buffers_;//.按morph vertex buffer索引
 };
 
 /// Description of vertex buffer data for asynchronous loading.
@@ -216,12 +212,12 @@ private:
     Vector<PODVector<unsigned> > geometryBoneMappings_;
     /// Geometry centers.
     PODVector<Vector3> geometryCenters_;
-    /// Vertex morphs.
+    
+    //.morph数据
     Vector<ModelMorph> morphs_;
-    /// Vertex buffer morph range start.
     PODVector<unsigned> morphRangeStarts_;
-    /// Vertex buffer morph range vertex count.
     PODVector<unsigned> morphRangeCounts_;
+    
     /// Vertex buffer data for asynchronous loading.
     Vector<VertexBufferDesc> loadVBData_;
     /// Index buffer data for asynchronous loading.

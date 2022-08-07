@@ -73,6 +73,7 @@ struct Bone
     WeakPtr<Node> node_;
 };
 
+//.สýพÝิด
 class URHO3D_API Skeleton
 {
 public:

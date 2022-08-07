@@ -44,11 +44,8 @@ class URHO3D_API StaticModel : public Drawable
     URHO3D_OBJECT(StaticModel, Drawable);
 
 public:
-    /// Construct.
     StaticModel(Context* context);
-    /// Destruct.
     ~StaticModel();
-    /// Register object factory. Drawable must be registered first.
     static void RegisterObject(Context* context);
 
     /// Process octree raycast. May be called from a worker thread.
@@ -62,8 +59,8 @@ public:
     /// Draw to occlusion buffer. Return true if did not run out of triangles.
     virtual bool DrawOcclusion(OcclusionBuffer* buffer);
 
-    /// Set model.
-    virtual void SetModel(Model* model);
+    virtual void SetModel(Model* model);//设置model_, 来自用户调用|E_RELOADFINISHED事件|Load函数
+
     /// Set material on all geometries.
     virtual void SetMaterial(Material* material);
     /// Set material on one geometry. Return true if successful.
@@ -73,35 +70,24 @@ public:
     /// Apply default materials from a material list file. If filename is empty (default), the model's resource name with extension .txt will be used.
     void ApplyMaterialList(const String& fileName = String::EMPTY);
 
-    /// Return model.
-    Model* GetModel() const { return model_; }
+	//.序列属性：Model、Material
+	void SetModelAttr(const ResourceRef& value);
+	void SetMaterialsAttr(const ResourceRefList& value);
+public:
+	Model* GetModel() const { return model_; }
+	virtual Material* GetMaterial(unsigned index = 0) const;
 
-    /// Return number of geometries.
     unsigned GetNumGeometries() const { return geometries_.Size(); }
-
-    /// Return material by geometry index.
-    virtual Material* GetMaterial(unsigned index = 0) const;
-
-    /// Return occlusion LOD level.
     unsigned GetOcclusionLodLevel() const { return occlusionLodLevel_; }
 
-    /// Determines if the given world space point is within the model geometry.
-    bool IsInside(const Vector3& point) const;
-    /// Determines if the given local space point is within the model geometry.
-    bool IsInsideLocal(const Vector3& point) const;
+	bool IsInside(const Vector3& point) const;//.返回world point是否在geometry_内
+	bool IsInsideLocal(const Vector3& point) const;//.返回local point是否在geometry_内
 
-    /// Set model attribute.
-    void SetModelAttr(const ResourceRef& value);
-    /// Set materials attribute.
-    void SetMaterialsAttr(const ResourceRefList& value);
-    /// Return model attribute.
+    //.序列属性：Model、Material
     ResourceRef GetModelAttr() const;
-    /// Return materials attribute.
     const ResourceRefList& GetMaterialsAttr() const;
-
 protected:
-    /// Recalculate the world-space bounding box.
-    virtual void OnWorldBoundingBoxUpdate();
+    virtual void OnWorldBoundingBoxUpdate();//.被GetWorldBoundingBox回调（脏标记）
     /// Set local-space bounding box.
     void SetBoundingBox(const BoundingBox& box);
     /// Set number of geometries.
@@ -115,13 +101,13 @@ protected:
     PODVector<StaticModelGeometryData> geometryData_;
     /// All geometries.
     Vector<Vector<SharedPtr<Geometry> > > geometries_;
-    /// Model.
-    SharedPtr<Model> model_;
+    
+    SharedPtr<Model> model_;//.数据源
+
     /// Occlusion LOD level.
     unsigned occlusionLodLevel_;
     /// Material list attribute.
     mutable ResourceRefList materialsAttr_;
-
 private:
     /// Handle model reload finished.
     void HandleModelReloadFinished(StringHash eventType, VariantMap& eventData);
