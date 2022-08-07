@@ -48,32 +48,25 @@ public:
     ~StaticModel();
     static void RegisterObject(Context* context);
 
-    /// Process octree raycast. May be called from a worker thread.
-    virtual void ProcessRayQuery(const RayOctreeQuery& query, PODVector<RayQueryResult>& results);
-    /// Calculate distance and prepare batches for rendering. May be called from worker thread(s), possibly re-entrantly.
-    virtual void UpdateBatches(const FrameInfo& frame);
-    /// Return the geometry for a specific LOD level.
-    virtual Geometry* GetLodGeometry(unsigned batchIndex, unsigned level);
-    /// Return number of occlusion geometry triangles.
-    virtual unsigned GetNumOccluderTriangles();
-    /// Draw to occlusion buffer. Return true if did not run out of triangles.
-    virtual bool DrawOcclusion(OcclusionBuffer* buffer);
+    virtual void ProcessRayQuery(const RayOctreeQuery& query, PODVector<RayQueryResult>& results);//.处理octree raycast, 工作线程安全
+    virtual void UpdateBatches(const FrameInfo& frame);///Calculate distance and prepare batches for rendering. May be called from worker thread(s), possibly re-entrantly.
 
     virtual void SetModel(Model* model);//设置model_, 来自用户调用|E_RELOADFINISHED事件|Load函数
 
-    /// Set material on all geometries.
-    virtual void SetMaterial(Material* material);
-    /// Set material on one geometry. Return true if successful.
-    virtual bool SetMaterial(unsigned index, Material* material);
-    /// Set occlusion LOD level. By default (M_MAX_UNSIGNED) same as visible.
-    void SetOcclusionLodLevel(unsigned level);
-    /// Apply default materials from a material list file. If filename is empty (default), the model's resource name with extension .txt will be used.
-    void ApplyMaterialList(const String& fileName = String::EMPTY);
+    //.geometries_ material
+    virtual void SetMaterial(Material* material);/// Set material on all geometries.
+    virtual bool SetMaterial(unsigned index, Material* material);/// Set material on one geometry. Return true if successful.
+    void SetOcclusionLodLevel(unsigned level);/// Set occlusion LOD level. By default (M_MAX_UNSIGNED) same as visible.
+    void ApplyMaterialList(const String& fileName = String::EMPTY);/// Apply default materials from a material list file. If filename is empty (default), the model's resource name with extension .txt will be used.
 
 	//.序列属性：Model、Material
 	void SetModelAttr(const ResourceRef& value);
 	void SetMaterialsAttr(const ResourceRefList& value);
 public:
+	virtual Geometry* GetLodGeometry(unsigned batchIndex, unsigned level);
+	virtual unsigned GetNumOccluderTriangles();
+	virtual bool DrawOcclusion(OcclusionBuffer* buffer);//.绘制到occlusion buffer
+
 	Model* GetModel() const { return model_; }
 	virtual Material* GetMaterial(unsigned index = 0) const;
 
@@ -88,25 +81,17 @@ public:
     const ResourceRefList& GetMaterialsAttr() const;
 protected:
     virtual void OnWorldBoundingBoxUpdate();//.被GetWorldBoundingBox回调（脏标记）
-    /// Set local-space bounding box.
     void SetBoundingBox(const BoundingBox& box);
-    /// Set number of geometries.
     void SetNumGeometries(unsigned num);
-    /// Reset LOD levels.
     void ResetLodLevels();
-    /// Choose LOD levels based on distance.
-    void CalculateLodLevels();
+    void CalculateLodLevels();//.基于distance选择Choose LOD levels
 
-    /// Extra per-geometry data.
     PODVector<StaticModelGeometryData> geometryData_;
-    /// All geometries.
-    Vector<Vector<SharedPtr<Geometry> > > geometries_;
+    Vector<Vector<SharedPtr<Geometry>>> geometries_;
     
     SharedPtr<Model> model_;//.数据源
 
-    /// Occlusion LOD level.
-    unsigned occlusionLodLevel_;
-    /// Material list attribute.
+    unsigned occlusionLodLevel_;//.Occlusion LOD level
     mutable ResourceRefList materialsAttr_;
 private:
     /// Handle model reload finished.

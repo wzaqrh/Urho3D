@@ -47,7 +47,7 @@ public:
 
     virtual void ApplyAttributes();//.应用延迟序列属性. 在 scene load | network update 之后调用
     virtual void ProcessRayQuery(const RayOctreeQuery& query, PODVector<RayQueryResult>& results);//.处理octree raycast, 工作线程安全
-    virtual void Update(const FrameInfo& frame);//.在 octree再插入 之前调用, 工作线程安全
+    virtual void Update(const FrameInfo& frame);//.在 octree再插入之前调用, 工作线程安全
     virtual void UpdateBatches(const FrameInfo& frame);/// Calculate distance and prepare batches for rendering. May be called from worker thread(s), possibly re-entrantly.
     virtual void UpdateGeometry(const FrameInfo& frame);//.被View.UpdateGeometries回调
     virtual UpdateGeometryType GetUpdateGeometryType();//.返回geometry update是否必要, 是否工作线程安全

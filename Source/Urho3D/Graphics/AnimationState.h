@@ -78,7 +78,7 @@ public://.setter
 
 	void AddWeight(float delta);
 
-    void Apply();//.按time_调整node.localSRT
+    void Apply();//.按weight_、time_调整node.localSRT
 
 public://.getter
 	float GetWeight() const { return weight_; }/// Return blending weight.
@@ -118,7 +118,7 @@ private:
     Bone* startBone_;//遍历animation_ tracks以name在startBone_里检索node、bone
     Vector<AnimationStateTrack> stateTracks_;//遍历animation_ tracks以name在node_里检索node
     
-	float weight_;
+	float weight_;//.被AnimationControl用于淡入淡出
 	float time_;
     bool looped_;
     unsigned char layer_;
