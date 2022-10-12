@@ -140,10 +140,13 @@ private:
 	void CloneGeometries();
 	void CopyMorphVertices(void* dest, void* src, unsigned vertexCount, VertexBuffer* clone, VertexBuffer* original);
     void ApplyMorph(VertexBuffer* buffer, void* destVertexData, unsigned morphRangeStart, const VertexBufferMorph& morph, float weight);
+	//.destVertexData[*] += morph[*] * weight, 模板为elementMask_
+	//变化来自morphs_权重
 private:
 	//.姿势相关
-	Vector<SharedPtr<VertexBuffer> > morphVertexBuffers_;//.【pos、normal、tangent】, 原始数据来自model_的vertex buffer, 加上morphs_每一个（按权重）分量 //.覆盖geometries_原vertex buffer
-	Vector<ModelMorph> morphs_;//.原始数据来自（除了weight）model_ morph
+	Vector<SharedPtr<VertexBuffer> > morphVertexBuffers_;//.【pos、normal、tangent】, 原始数据来自model_.vertexBuffers_
+	Vector<ModelMorph> morphs_;//.原始数据来自（除了weight）model_ morph  //j = morphs_[?].buffers_[i]; morphVertexBuffers_[j]
+	//morphVertexBuffers_加上morphs_每一个（按权重）分量 //.覆盖geometries_原vertex buffer
 	unsigned morphElementMask_;//.morphs_ vertex buffer mask【pos、normal、tangent】
     mutable VectorBuffer attrBuffer_;//.主要是morphs_ weight
 

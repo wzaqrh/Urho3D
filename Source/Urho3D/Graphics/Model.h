@@ -215,7 +215,7 @@ private:
     
     //.morph数据
     Vector<ModelMorph> morphs_;
-    PODVector<unsigned> morphRangeStarts_;
+    PODVector<unsigned> morphRangeStarts_;//.vertexBuffers_i[morphRangeStarts_i, morphRangeCounts_i]可以做变形
     PODVector<unsigned> morphRangeCounts_;
     
     /// Vertex buffer data for asynchronous loading.
